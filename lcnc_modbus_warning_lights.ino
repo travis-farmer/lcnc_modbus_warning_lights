@@ -31,6 +31,7 @@ bool lcncProgramIdle = false;
 bool lcncProgramPaused = false;
 bool lcncEstop = false;
 bool lcncLaserRunning = false;
+unsigned long lastTimer = 0UL;
 
 byte buf[bufSize];
 ModbusRTUSlave modbus(Serial1, buf, bufSize, dePin);
@@ -63,28 +64,30 @@ void setup() {
  */
 void loop() {
     modbus.poll();
-
-    if (lcncProgramRunning == true && lcncProgramPaused == false && lcncProgramIdle == false && lcncEstop == true) {
-        pixels.setPixelColor(0, pixels.Color(0,255,0)); // green
-        pixels.setPixelColor(1, pixels.Color(0,255,0));
-        pixels.setPixelColor(2, pixels.Color(255,255,255)); // white
-        pixels.setPixelColor(3, pixels.Color(255,255,255));
-    } else if (((lcncLaserRunning == true && lcncProgramPaused == true) || lcncProgramIdle == true) && lcncEstop == true) {
-        pixels.setPixelColor(0, pixels.Color(255,255,0)); // orange
-        pixels.setPixelColor(1, pixels.Color(255,255,0));
-        pixels.setPixelColor(2, pixels.Color(0,0,0)); // off
-        pixels.setPixelColor(3, pixels.Color(0,0,0));
-    } else if (lcncEstop == false) {
-        pixels.setPixelColor(0, pixels.Color(255,0,0)); // red
-        pixels.setPixelColor(1, pixels.Color(255,0,0));
-        pixels.setPixelColor(2, pixels.Color(0,0,0)); // off
-        pixels.setPixelColor(3, pixels.Color(0,0,0));
+    if (millis() - lastTimer >= 50) {
+        lastTimer = millis();
+        if (lcncProgramRunning == true && lcncProgramPaused == false && lcncProgramIdle == false && lcncEstop == true) {
+            pixels.setPixelColor(0, pixels.Color(0,255,0)); // green
+            pixels.setPixelColor(1, pixels.Color(0,255,0));
+            pixels.setPixelColor(2, pixels.Color(255,255,255)); // white
+            pixels.setPixelColor(3, pixels.Color(255,255,255));
+        } else if (((lcncLaserRunning == true && lcncProgramPaused == true) || lcncProgramIdle == true) && lcncEstop == true) {
+            pixels.setPixelColor(0, pixels.Color(255,255,0)); // orange
+            pixels.setPixelColor(1, pixels.Color(255,255,0));
+            pixels.setPixelColor(2, pixels.Color(0,0,0)); // off
+            pixels.setPixelColor(3, pixels.Color(0,0,0));
+        } else if (lcncEstop == false) {
+            pixels.setPixelColor(0, pixels.Color(255,0,0)); // red
+            pixels.setPixelColor(1, pixels.Color(255,0,0));
+            pixels.setPixelColor(2, pixels.Color(0,0,0)); // off
+            pixels.setPixelColor(3, pixels.Color(0,0,0));
+        }
+        if (lcncLaserRunning == true) {
+            pixels.setPixelColor(4, pixels.Color(0,0,255)); // blue
+            pixels.setPixelColor(5, pixels.Color(0,0,255));
+        }
+        pixels.show();
     }
-    if (lcncLaserRunning == true) {
-        pixels.setPixelColor(4, pixels.Color(0,0,255)); // blue
-        pixels.setPixelColor(5, pixels.Color(0,0,255));
-    }
-    pixels.show();
 }
 
 
